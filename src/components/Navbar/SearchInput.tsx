@@ -21,7 +21,7 @@ const SearchInput: React.FC<SearchInputProps> = () => {
           />
         </InputLeftElement>
         <Input
-          placeholder="Search Threadit"
+          placeholder="Search Threddit"
           fontSize="10pt"
           _placeholder={{ color: "gray.500" }}
           _hover={{
