@@ -1,7 +1,10 @@
 import { authModalState } from "@/src/atoms/authModalAtom"
-import { Input, Button, Flex, Text } from "@chakra-ui/react"
+import { auth } from "@/src/firebase/clientApp"
+import { Button, Flex, Input, Text } from "@chakra-ui/react"
 import React, { useState } from "react"
+import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth"
 import { useSetRecoilState } from "recoil"
+import { FIREBASE_ERRORS } from "@/src/firebase/errors"
 
 const SignUp: React.FC = () => {
   const [signUpForm, setSignUpForm] = useState({
@@ -10,19 +13,33 @@ const SignUp: React.FC = () => {
     confirmPassword: "",
   })
 
+  const [createUserWithEmailAndPassword, user, loading, userError] =
+    useCreateUserWithEmailAndPassword(auth)
+
+  const [formError, setFormError] = useState("")
+
   const setAuthModalState = useSetRecoilState(authModalState)
 
-  const onSubmit = () => {}
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (formError) setFormError("")
+    if (signUpForm.password !== signUpForm.confirmPassword) {
+      setFormError("Passwords do not match")
+      return
+    }
+
+    createUserWithEmailAndPassword(signUpForm.email, signUpForm.password)
+  }
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginForm((prev) => ({
+    setSignUpForm((prev) => ({
       ...prev,
       [event.target.name]: event.target.value,
     }))
   }
 
   return (
-    <form>
+    <form onSubmit={onSubmit}>
       <Input
         required
         name="email"
@@ -77,14 +94,23 @@ const SignUp: React.FC = () => {
         }}
         bg="gray.50"
       />
+      <Text
+        textAlign="center"
+        color="red"
+        fontSize="10pt"
+      >
+        {formError ||
+          FIREBASE_ERRORS[userError?.message as keyof typeof FIREBASE_ERRORS]}
+      </Text>
       <Button
         width="100%"
         height="36px"
         mt={2}
         mb={2}
         type="submit"
+        isLoading={loading}
       >
-        Log In
+        Sign Up
       </Button>
       <Flex
         fontSize="9pt"
