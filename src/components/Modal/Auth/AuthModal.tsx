@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { authModalState } from "@/src/atoms/authModalAtom"
 import { auth } from "@/src/firebase/clientApp"
 import {
@@ -10,7 +11,7 @@ import {
   ModalOverlay,
   Text,
 } from "@chakra-ui/react"
-import React from "react"
+import React, { useEffect } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { useRecoilState } from "recoil"
 import AuthInputs from "./AuthInputs"
@@ -26,6 +27,11 @@ const AuthModal: React.FC = () => {
       open: false,
     }))
   }
+
+  useEffect(() => {
+    if (user) handleClose()
+    console.log("user: ", user)
+  }, [user])
 
   return (
     <>

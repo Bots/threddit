@@ -22,7 +22,6 @@ const Login: React.FC<LoginProps> = () => {
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     signInWithEmailAndPassword(loginForm.email, loginForm.password)
-    console.log(authError)
   }
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +82,7 @@ const Login: React.FC<LoginProps> = () => {
         mt={2}
         mb={2}
         type="submit"
+        isLoading={loading}
       >
         Log In
       </Button>
