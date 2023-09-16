@@ -1,16 +1,33 @@
 import { Flex, Button, Image, Text } from "@chakra-ui/react"
-import React from "react"
+import React, { useEffect } from "react"
 import {
   useSignInWithGoogle,
   useSignInWithTwitter,
 } from "react-firebase-hooks/auth"
-import { auth } from "@/src/firebase/clientApp"
+import { auth, firestore } from "@/src/firebase/clientApp"
+import { User } from "firebase/auth"
+import { doc, setDoc } from "firebase/firestore"
 
 const OAuthButtons: React.FC = () => {
   const [signInWithGoogle, googleUser, googleLoading, googleError] =
     useSignInWithGoogle(auth)
   const [signInWithTwitter, twitterUser, twitterLoading, twitterError] =
     useSignInWithTwitter(auth)
+
+  const createUserDocument = async (user: User) => {
+    const userDocRef = doc(firestore, "users", user.uid)
+    await setDoc(userDocRef, JSON.parse(JSON.stringify(user)))
+  }
+
+  useEffect(() => {
+    if (googleUser) {
+      createUserDocument(googleUser.user)
+    }
+    if (twitterUser) {
+      createUserDocument(twitterUser.user)
+    }
+  }, [googleUser, twitterUser])
+
   return (
     <Flex
       direction="column"
