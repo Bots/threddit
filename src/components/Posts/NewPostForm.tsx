@@ -43,12 +43,23 @@ const NewPostForm: React.FC<NewPostFormProps> = () => {
     body: "",
   })
   const [selectedFile, setSelectedFile] = useState<string>()
+  const [loading, setLoading] = useState(false)
 
   const handleCreatePost = async () => {}
 
   const onSelectImage = () => {}
 
-  const onTextChange = () => {}
+  const onTextChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const {
+      target: { name, value },
+    } = event
+    setTextInputs((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
 
   return (
     <Flex
@@ -68,7 +79,14 @@ const NewPostForm: React.FC<NewPostFormProps> = () => {
         ))}
       </Flex>
       <Flex p={4}>
-        <TextInputs />
+        {selectedTab === "Post" && (
+          <TextInputs
+            textInputs={textInputs}
+            handleCreatePost={handleCreatePost}
+            onChange={onTextChange}
+            loading={loading}
+          />
+        )}
       </Flex>
     </Flex>
   )
