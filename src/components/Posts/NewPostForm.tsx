@@ -1,6 +1,6 @@
 import { Post } from "@/src/atoms/postAtom"
 import { firestore, storage } from "@/src/firebase/clientApp"
-import { Flex, Icon } from "@chakra-ui/react"
+import { Alert, AlertIcon, Flex, Icon, Text } from "@chakra-ui/react"
 import { User } from "firebase/auth"
 import {
   Timestamp,
@@ -60,6 +60,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
   })
   const [selectedFile, setSelectedFile] = useState<string>()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   const handleCreatePost = async () => {
     const { communityId } = router.query
@@ -96,9 +97,10 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
         })
       }
       // redirect the user back to the communityPage using the router
-      // router.back()
+      router.back()
     } catch (error) {
       console.log("handleCreatePostError: ", error)
+      setError(true)
     }
     setLoading(false)
   }
@@ -163,6 +165,12 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
           />
         )}
       </Flex>
+      {error && (
+        <Alert status="error">
+          <AlertIcon />
+          <Text mr={2}>Error creating post</Text>
+        </Alert>
+      )}
     </Flex>
   )
 }

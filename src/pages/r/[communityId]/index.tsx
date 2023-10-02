@@ -3,6 +3,7 @@ import CreatePostLink from "@/src/components/Community/CreatePostLink"
 import Header from "@/src/components/Community/Header"
 import NotFound from "@/src/components/Community/NotFound"
 import PageContent from "@/src/components/Layout/PageContent"
+import Posts from "@/src/components/Posts/Posts"
 import { firestore } from "@/src/firebase/clientApp"
 import { doc, getDoc } from "firebase/firestore"
 import { GetServerSidePropsContext } from "next"
@@ -25,6 +26,7 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
       <PageContent>
         <>
           <CreatePostLink />
+          <Posts communityData={communityData} />
         </>
         <>
           <div>RHS</div>
@@ -48,14 +50,14 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       props: {
         communityData: communityDoc.exists()
           ? JSON.parse(
-              safeJsonStringify({ id: communityDoc.id, ...communityDoc.data() })
+              safeJsonStringify({ id: communityDoc.id, ...communityDoc.data() }) // needed for dates
             )
           : "",
       },
     }
   } catch (error) {
-    // Could add error page here
-    console.log("getServerSideProps error: ", error)
+    // Could create error page here
+    console.log("getServerSideProps error - [community]", error)
     return { props: {} }
   }
 }

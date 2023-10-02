@@ -100,6 +100,12 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
       console.log("handleCreateCommunity error: ", error)
       setError(error.message)
     }
+    setSnippetState((prev) => ({
+      ...prev,
+      mySnippets: [],
+    }))
+    handleClose()
+    router.push(`r/${name}`)
     setLoading(false)
   }
 
