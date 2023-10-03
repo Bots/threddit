@@ -1,3 +1,4 @@
+import { communityState } from "@/src/atoms/communitiesAtom"
 import { auth, firestore } from "@/src/firebase/clientApp"
 import {
   Box,
@@ -17,10 +18,12 @@ import {
   Text,
 } from "@chakra-ui/react"
 import { doc, runTransaction, serverTimestamp } from "firebase/firestore"
+import router from "next/router"
 import React, { useState } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { BsFillEyeFill, BsFillPersonFill } from "react-icons/bs"
 import { HiLockClosed } from "react-icons/hi"
+import { useSetRecoilState } from "recoil"
 
 type CreateCommunityModalProps = {
   open: boolean
@@ -31,6 +34,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   open,
   handleClose,
 }) => {
+  const setSnippetState = useSetRecoilState(communityState)
   const [user] = useAuthState(auth)
   const [communityName, setCommunityName] = useState("")
   const [charsRemaining, setCharsRemaining] = useState(21)
@@ -105,7 +109,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
       mySnippets: [],
     }))
     handleClose()
-    router.push(`r/${name}`)
+    router.push(`r/${communityName}`)
     setLoading(false)
   }
 
