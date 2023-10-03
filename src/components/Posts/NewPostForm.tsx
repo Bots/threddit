@@ -23,7 +23,7 @@ type NewPostFormProps = {
   user: User
 }
 
-const formTabs: TabItem[] = [
+const formTabs: TabItemType[] = [
   {
     title: "Post",
     icon: IoDocumentText,
@@ -46,7 +46,7 @@ const formTabs: TabItem[] = [
   },
 ]
 
-export type TabItem = {
+export type TabItemType = {
   title: string
   icon: typeof Icon.arguments
 }
