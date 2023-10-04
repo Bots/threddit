@@ -1,5 +1,13 @@
 import { Post } from "@/src/atoms/postAtom"
-import { Flex, Icon, Image, Skeleton, Stack, Text } from "@chakra-ui/react"
+import {
+  Flex,
+  Icon,
+  Image,
+  Skeleton,
+  Spinner,
+  Stack,
+  Text,
+} from "@chakra-ui/react"
 import moment from "moment"
 import React, { useState } from "react"
 import { AiOutlineDelete } from "react-icons/ai"
@@ -32,9 +40,11 @@ const PostItem: React.FC<PostItemProps> = ({
   onSelectPost,
 }) => {
   const [loadingImage, setLoadingImage] = useState(true)
+  const [loadingDelete, setLoadingDelete] = useState(false)
   const [error, setError] = useState(false)
 
   const handleDelete = async () => {
+    setLoadingDelete(true)
     try {
       const success = await onDeletePost(post)
 
@@ -46,6 +56,7 @@ const PostItem: React.FC<PostItemProps> = ({
     } catch (error: any) {
       setError(error.message)
     }
+    setLoadingDelete(false)
   }
 
   return (
@@ -191,11 +202,17 @@ const PostItem: React.FC<PostItemProps> = ({
               cursor="pointer"
               onClick={handleDelete}
             >
-              <Icon
-                as={AiOutlineDelete}
-                mr={2}
-              />
-              <Text fontSize="9pt">Delete</Text>
+              {loadingDelete ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  <Icon
+                    as={AiOutlineDelete}
+                    mr={2}
+                  />
+                  <Text fontSize="9pt">Delete</Text>
+                </>
+              )}
             </Flex>
           )}
         </Flex>
