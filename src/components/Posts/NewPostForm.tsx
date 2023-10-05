@@ -1,4 +1,4 @@
-import { Post } from "@/src/atoms/postAtom"
+import { Post, postState } from "@/src/atoms/postAtom"
 import { firestore, storage } from "@/src/firebase/clientApp"
 import { Alert, AlertIcon, Flex, Icon, Text } from "@chakra-ui/react"
 import { User } from "firebase/auth"
@@ -18,6 +18,7 @@ import { IoDocumentText, IoImageOutline } from "react-icons/io5"
 import ImageUpload from "./PostForm/ImageUpload"
 import TextInputs from "./PostForm/TextInputs"
 import TabItem from "./TabItem"
+import { useSetRecoilState } from "recoil"
 
 type NewPostFormProps = {
   user: User
@@ -61,29 +62,26 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
   const [selectedFile, setSelectedFile] = useState<string>()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
+  const setPostItems = useSetRecoilState(postState)
 
   const handleCreatePost = async () => {
     const { communityId } = router.query
 
-    // Create new post object of type post
-    const newPost: Post = {
-      communityId: communityId as string,
-      creatorId: user.uid,
-      creatorDisplayName: user.email
-        ? user.email.split("@")[0]
-        : user.displayName!,
-      title: textInputs.title,
-      body: textInputs.body,
-      numberOfComments: 0,
-      voteStatus: 0,
-      createdAt: serverTimestamp() as Timestamp,
-      id: "",
-    }
-
     setLoading(true)
     try {
       // Store the post in the db
-      const postDocRef = await addDoc(collection(firestore, "posts"), newPost)
+      const postDocRef = await addDoc(collection(firestore, "posts"), {
+        communityId,
+        creatorId: user.uid,
+        creatorDisplayName: user.email
+          ? user.email.split("@")[0]
+          : user.displayName!,
+        title: textInputs.title,
+        body: textInputs.body,
+        numberOfComments: 0,
+        voteStatus: 0,
+        createdAt: serverTimestamp() as Timestamp,
+      })
 
       // Check for selected file
       if (selectedFile) {
@@ -98,6 +96,11 @@ const NewPostForm: React.FC<NewPostFormProps> = ({ user }) => {
         })
       }
       // redirect the user back to the communityPage using the router
+      // Clear the cache to cause a refetch of the posts
+      setPostItems((prev) => ({
+        ...prev,
+        postUpdateRequired: true,
+      }))
       router.back()
     } catch (error) {
       console.log("handleCreatePostError: ", error)

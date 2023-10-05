@@ -1,5 +1,7 @@
 import { Post } from "@/src/atoms/postAtom"
 import {
+  Alert,
+  AlertIcon,
   Flex,
   Icon,
   Image,
@@ -49,7 +51,7 @@ const PostItem: React.FC<PostItemProps> = ({
       const success = await onDeletePost(post)
 
       if (!success) {
-        throw new Error("Failed to delete the post")
+        throw new Error("Failed to delete post")
       }
 
       console.log("Post was successfully deleted")
@@ -103,6 +105,12 @@ const PostItem: React.FC<PostItemProps> = ({
         direction="column"
         width="100%"
       >
+        {error && (
+          <Alert status="error">
+            <AlertIcon />
+            <Text mr={2}>{error}</Text>
+          </Alert>
+        )}
         <Stack
           spacing={1}
           p="10px"

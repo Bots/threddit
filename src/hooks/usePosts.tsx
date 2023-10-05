@@ -12,8 +12,10 @@ const usePosts = () => {
   const onSelectPost = () => {}
 
   const onDeletePost = async (post: Post): Promise<boolean> => {
+    console.log(post.imageURL)
+    console.log(post.id)
     try {
-      // Check if there is an image related to post, delete if so
+      // Check if image exists, delete if so
       if (post.imageURL) {
         const imageRef = ref(storage, `posts/${post.id}/image`)
         await deleteObject(imageRef)
