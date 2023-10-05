@@ -35,8 +35,17 @@ const Header: React.FC<HeaderProps> = ({ communityData }) => {
           width="95%"
           maxWidth="860px"
         >
-          {communityData.imageURL ? (
-            <Image alt="Community Image" />
+          {communityStateValue.currentCommunity?.imageURL ? (
+            <Image
+              borderRadius="full"
+              boxSize="66px"
+              src={communityStateValue.currentCommunity.imageURL}
+              alt="Community Image"
+              position="relative"
+              top={-3}
+              color="blue.500"
+              border="4px solid white"
+            />
           ) : (
             <Icon
               as={FaReddit}
