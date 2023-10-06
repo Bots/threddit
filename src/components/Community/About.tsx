@@ -28,7 +28,6 @@ type AboutProps = {
 }
 
 const About: React.FC<AboutProps> = ({ communityData }) => {
-  s
   const [user] = useAuthState(auth)
   const selectedFileRef = useRef<HTMLInputElement>(null)
   const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile()
