@@ -63,9 +63,6 @@ const usePosts = () => {
           communityId,
           voteValue: vote,
         }
-
-        console.log("NEW VOTE!!!", newVote)
-
         // APRIL 25 - DON'T THINK WE NEED THIS
         // newVote.id = postVoteRef.id;
 
