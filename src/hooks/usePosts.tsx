@@ -169,8 +169,6 @@ const usePosts = () => {
   }
 
   const onDeletePost = async (post: Post): Promise<boolean> => {
-    console.log(post.imageURL)
-    console.log(post.id)
     try {
       // Check if image exists, delete if so
       if (post.imageURL) {
