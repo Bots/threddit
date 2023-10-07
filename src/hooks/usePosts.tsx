@@ -15,14 +15,22 @@ import { Post, PostVote, postState } from "../atoms/postAtom"
 import { auth, firestore, storage } from "../firebase/clientApp"
 import { useEffect } from "react"
 import { communityState } from "../atoms/communitiesAtom"
+import { useRouter } from "next/router"
 
 const usePosts = () => {
-  const [postStateValue, setPostStateValue] = useRecoilState(postState)
   const [user] = useAuthState(auth)
+  const router = useRouter()
+  const [postStateValue, setPostStateValue] = useRecoilState(postState)
   const currentCommunity = useRecoilValue(communityState).currentCommunity
   const setAuthModalState = useSetRecoilState(authModalState)
 
-  const onVote = async (post: Post, vote: number, communityId: string) => {
+  const onVote = async (
+    event: React.MouseEvent<SVGElement, MouseEvent>,
+    post: Post,
+    vote: number,
+    communityId: string
+  ) => {
+    event.stopPropagation()
     // Check for user and if not, redirect to auth modal
     if (!user?.uid) {
       setAuthModalState({ open: true, view: "login" })
@@ -139,6 +147,13 @@ const usePosts = () => {
       // Optimistically update the UI
       setPostStateValue(updatedState)
 
+      if (postStateValue.selectedPost) {
+        setPostStateValue((prev) => ({
+          ...prev,
+          selectedPost: updatedPost,
+        }))
+      }
+
       // Update database
       const postRef = doc(firestore, "posts", post.id)
       batch.update(postRef, { voteStatus: voteStatus + voteChange })
@@ -148,7 +163,13 @@ const usePosts = () => {
     }
   }
 
-  const onSelectPost = () => {}
+  const onSelectPost = (post: Post) => {
+    setPostStateValue((prev) => ({
+      ...prev,
+      selectedPost: post,
+    }))
+    router.push(`/r/${post.communityId}/comments/${post.id}`)
+  }
 
   const onDeletePost = async (post: Post): Promise<boolean> => {
     console.log(post.imageURL)
@@ -192,6 +213,17 @@ const usePosts = () => {
       postVotes: postVotes as PostVote[],
     }))
   }
+
+  useEffect(() => {
+    if (!user) {
+      // Clear user post votes
+      setPostStateValue((prev) => ({
+        ...prev,
+        postVotes: [],
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   useEffect(() => {
     if (!user || !currentCommunity?.id) return

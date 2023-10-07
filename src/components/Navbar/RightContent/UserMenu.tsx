@@ -1,8 +1,6 @@
-import { FaRedditSquare } from "react-icons/fa"
-import { VscAccount } from "react-icons/vsc"
-import { IoSparkles } from "react-icons/io5"
-import { MdOutlineLogin } from "react-icons/md"
-import { CgProfile } from "react-icons/cg"
+import { authModalState } from "@/src/atoms/authModalAtom"
+import { auth } from "@/src/firebase/clientApp"
+import { ChevronDownIcon } from "@chakra-ui/icons"
 import {
   Flex,
   Icon,
@@ -15,24 +13,22 @@ import {
 } from "@chakra-ui/react"
 import { User, signOut } from "firebase/auth"
 import React from "react"
-import { ChevronDownIcon } from "@chakra-ui/icons"
-import { auth } from "@/src/firebase/clientApp"
-import { useResetRecoilState, useSetRecoilState } from "recoil"
-import { authModalState } from "@/src/atoms/authModalAtom"
-import { communityState } from "@/src/atoms/communitiesAtom"
+import { CgProfile } from "react-icons/cg"
+import { FaRedditSquare } from "react-icons/fa"
+import { IoSparkles } from "react-icons/io5"
+import { MdOutlineLogin } from "react-icons/md"
+import { VscAccount } from "react-icons/vsc"
+import { useSetRecoilState } from "recoil"
 
 type UserMenuProps = {
   user?: User | null
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
-  const resetCommunityState = useResetRecoilState(communityState)
   const setAuthModalState = useSetRecoilState(authModalState)
 
   const logout = async () => {
     await signOut(auth)
-    // Clear our community state
-    resetCommunityState()
   }
 
   return (
