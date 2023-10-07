@@ -24,11 +24,13 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
     return <NotFound />
   }
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     setCommunityStateValue((prev) => ({
       ...prev,
       currentCommunity: communityData,
     }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
