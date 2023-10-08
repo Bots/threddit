@@ -1,12 +1,3 @@
-import { useEffect, useState } from "react"
-import { useRecoilState, useSetRecoilState } from "recoil"
-import {
-  Community,
-  communityState,
-  CommunitySnippet,
-} from "../atoms/communitiesAtom"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth, firestore } from "../firebase/clientApp"
 import {
   collection,
   doc,
@@ -15,8 +6,17 @@ import {
   increment,
   writeBatch,
 } from "firebase/firestore"
-import { authModalState } from "../atoms/authModalAtom"
 import { useRouter } from "next/router"
+import { useEffect, useState } from "react"
+import { useAuthState } from "react-firebase-hooks/auth"
+import { useRecoilState, useSetRecoilState } from "recoil"
+import { authModalState } from "../atoms/authModalAtom"
+import {
+  Community,
+  CommunitySnippet,
+  communityState,
+} from "../atoms/communitiesAtom"
+import { auth, firestore } from "../firebase/clientApp"
 
 const useCommunityData = () => {
   const [user] = useAuthState(auth)

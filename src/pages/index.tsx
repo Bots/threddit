@@ -14,12 +14,13 @@ import {
   where,
 } from "firebase/firestore"
 import usePosts from "../hooks/usePosts"
-import { Post } from "../atoms/postAtom"
+import { Post, PostVote } from "../atoms/postAtom"
 import PostLoader from "../components/Posts/PostLoader"
 import { Stack } from "@chakra-ui/react"
 import PostItem from "../components/Posts/PostItem"
 import CreatePostLink from "../components/Community/CreatePostLink"
 import useCommunityData from "../hooks/useCommunityData"
+import Recommendations from "../components/Community/Recommendations"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -90,9 +91,28 @@ export default function Home() {
     setLoading(false)
   }
 
-  const getUserPostVotes = () => {}
+  const getUserPostVotes = async () => {
+    try {
+      const postIds = postStateValue.posts.map((post) => post.id)
+      const postVotesQuery = query(
+        collection(firestore, `users/${user?.uid}/postVotes`),
+        where("postId", "in", postIds)
+      )
+      const postVoteDocs = await getDocs(postVotesQuery)
 
-  // useEffects
+      const postVotes = postVoteDocs.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+
+      setPostStateValue((prev) => ({
+        ...prev,
+        postVotes: postVotes as PostVote[],
+      }))
+    } catch (error) {
+      console.log("getUserPostVotes error: ", error)
+    }
+  }
 
   useEffect(() => {
     if (communityStateValue.snippetsFetched) buildUserHomeFeed()
@@ -104,6 +124,17 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loadingUser])
 
+  useEffect(() => {
+    if (user && postStateValue.posts.length) getUserPostVotes()
+
+    return () => {
+      setPostStateValue((prev) => ({
+        ...prev,
+        postVotes: [],
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, postStateValue.posts])
   return (
     <PageContent>
       <>
@@ -131,7 +162,9 @@ export default function Home() {
           </Stack>
         )}
       </>
-      <>{/* Recommendations */}</>
+      <>
+        <Recommendations />
+      </>
     </PageContent>
   )
 }
