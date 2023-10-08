@@ -3,10 +3,13 @@ import { Flex, Icon, Menu, MenuButton, MenuList, Text } from "@chakra-ui/react"
 import React from "react"
 import { TiHome } from "react-icons/ti"
 import Communities from "./Communities"
+import useDirectory from "@/src/hooks/useDirectory"
 
 const UserMenu: React.FC = () => {
+  const { directoryState, toggleMenuOpen } = useDirectory()
+
   return (
-    <Menu>
+    <Menu isOpen={directoryState.isOpen}>
       <MenuButton
         cursor="pointer"
         padding="0px 6px"
@@ -14,6 +17,7 @@ const UserMenu: React.FC = () => {
         mr={2}
         ml={{ base: 0, md: 2 }}
         _hover={{ outline: "1px solid", outlineColor: "gray.200" }}
+        onClick={toggleMenuOpen}
       >
         <Flex
           align="center"

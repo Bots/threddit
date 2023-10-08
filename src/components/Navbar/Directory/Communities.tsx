@@ -41,7 +41,7 @@ const Communities: React.FC<CommunitiesProps> = () => {
               displayText={`r/${snippet.communityId}`}
               link={`/r/${snippet.communityId}`}
               iconColor="brand.100"
-              imageUrl={snippet.imageURL}
+              imageURL={snippet.imageURL}
             />
           ))}
       </Box>
@@ -80,7 +80,7 @@ const Communities: React.FC<CommunitiesProps> = () => {
             displayText={`r/${snippet.communityId}`}
             link={`/r/${snippet.communityId}`}
             iconColor="blue.500"
-            imageUrl={snippet.imageURL}
+            imageURL={snippet.imageURL}
           />
         ))}
       </Box>
