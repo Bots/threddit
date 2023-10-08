@@ -16,7 +16,6 @@ import { doc, updateDoc } from "firebase/firestore"
 import { getDownloadURL, ref, uploadString } from "firebase/storage"
 import moment from "moment"
 import Link from "next/link"
-import { useRouter } from "next/router"
 import React, { useRef, useState } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { FaReddit } from "react-icons/fa"
@@ -69,6 +68,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
     } catch (error: any) {
       console.log("onUpdateImage Error: ", error.message)
     }
+    setSelectedFile(undefined)
     setUploadingImage(false)
   }
 

@@ -2,6 +2,7 @@ import { Community, communityState } from "@/src/atoms/communitiesAtom"
 import About from "@/src/components/Community/About"
 import CreatePostLink from "@/src/components/Community/CreatePostLink"
 import Header from "@/src/components/Community/Header"
+import CommunityNotFound from "@/src/components/Community/NotFound"
 import NotFound from "@/src/components/Community/NotFound"
 import PageContent from "@/src/components/Layout/PageContent"
 import Posts from "@/src/components/Posts/Posts"
@@ -31,7 +32,11 @@ const CommunityPage: React.FC<CommunityPageProps> = ({ communityData }) => {
       currentCommunity: communityData,
     }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [communityData])
+
+  if (!communityData) {
+    return <CommunityNotFound />
+  }
 
   return (
     <>
