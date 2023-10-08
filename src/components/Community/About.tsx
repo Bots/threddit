@@ -68,6 +68,7 @@ const About: React.FC<AboutProps> = ({ communityData }) => {
     } catch (error: any) {
       console.log("onUpdateImage Error: ", error.message)
     }
+    setSelectedFile(undefined)
     setUploadingImage(false)
   }
 
