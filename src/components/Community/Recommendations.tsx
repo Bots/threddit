@@ -118,6 +118,7 @@ const Recommendations: React.FC = () => {
                   href={`/r/${community.id}`}
                 >
                   <Flex
+                    position="relative"
                     align="center"
                     fontSize="10pt"
                     borderBottom="1px solid"
@@ -160,7 +161,10 @@ const Recommendations: React.FC = () => {
                         >{`r/${community.id}`}</span>
                       </Flex>
                     </Flex>
-                    <Box>
+                    <Box
+                      position="absolute"
+                      right="10px"
+                    >
                       <Button
                         height="22px"
                         fontSize="8pt"
@@ -179,6 +183,14 @@ const Recommendations: React.FC = () => {
                 </Link>
               )
             })}
+            <Box p="10px 20px">
+              <Button
+                height="30px"
+                width="100%"
+              >
+                View All
+              </Button>
+            </Box>
           </>
         )}
       </Flex>
