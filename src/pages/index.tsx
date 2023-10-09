@@ -74,7 +74,7 @@ export default function Home() {
       const postQuery = query(
         collection(firestore, "posts"),
         orderBy("voteStatus", "desc"),
-        limit(10)
+        limit(50)
       )
 
       const postDocs = await getDocs(postQuery)
