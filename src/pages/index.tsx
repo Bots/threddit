@@ -1,34 +1,36 @@
-import { Inter } from "next/font/google"
-import PageContent from "../components/Layout/PageContent"
-import { useAuthState } from "react-firebase-hooks/auth"
-import { auth, firestore } from "../firebase/clientApp"
-import { useEffect, useState } from "react"
-import { useRecoilValue } from "recoil"
-import { communityState } from "../atoms/communitiesAtom"
+import { Flex, Stack } from "@chakra-ui/react"
 import {
   collection,
   getDocs,
   limit,
   orderBy,
   query,
+  startAfter,
   where,
 } from "firebase/firestore"
-import usePosts from "../hooks/usePosts"
+import { Inter } from "next/font/google"
+import { useEffect, useState } from "react"
+import { useAuthState } from "react-firebase-hooks/auth"
 import { Post, PostVote } from "../atoms/postAtom"
-import PostLoader from "../components/Posts/PostLoader"
-import { Stack } from "@chakra-ui/react"
-import PostItem from "../components/Posts/PostItem"
 import CreatePostLink from "../components/Community/CreatePostLink"
-import useCommunityData from "../hooks/useCommunityData"
-import Recommendations from "../components/Community/Recommendations"
-import Premium from "../components/Community/Premium"
 import PersonalHome from "../components/Community/PersonalHome"
+import Premium from "../components/Community/Premium"
+import Recommendations from "../components/Community/Recommendations"
+import PageContent from "../components/Layout/PageContent"
+import PostItem from "../components/Posts/PostItem"
+import PostLoader from "../components/Posts/PostLoader"
+import { auth, firestore } from "../firebase/clientApp"
+import useCommunityData from "../hooks/useCommunityData"
+import usePosts from "../hooks/usePosts"
+import InfiniteScroll from "react-infinite-scroll-component"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export default function Home() {
   const [user, loadingUser] = useAuthState(auth)
   const [loading, setLoading] = useState(false)
+  const [lastVisibleItem, setLastVisibleItem] = useState({})
+  const [hasMore, setHasMore] = useState(true)
   const {
     postStateValue,
     setPostStateValue,
@@ -38,60 +40,141 @@ export default function Home() {
   } = usePosts()
   const { communityStateValue } = useCommunityData()
 
-  const buildUserHomeFeed = async () => {
+  const userFetchFirst = async () => {
     if (communityStateValue.mySnippets.length) {
       // Get posts from users communities
+      try {
+        const myCommunityIds = communityStateValue.mySnippets.map(
+          (snippet) => snippet.communityId
+        )
+        const postQuery = query(
+          collection(firestore, "posts"),
+          where("communityId", "in", myCommunityIds),
+          orderBy("createdAt", "desc"),
+          limit(5)
+        )
+
+        const postDocs = await getDocs(postQuery)
+
+        setLastVisibleItem(postDocs.docs[postDocs.docs.length - 1])
+
+        const posts = postDocs.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+
+        posts.length < 5 && setHasMore(false)
+
+        setPostStateValue((prev) => ({
+          ...prev,
+          posts: posts as Post[],
+        }))
+
+        return posts
+      } catch (error) {
+        console.log("userFetchFirst error: ", error)
+      }
+    } else {
+      noUserFetchFirst()
+    }
+  }
+
+  const userFetchNext = async () => {
+    try {
       const myCommunityIds = communityStateValue.mySnippets.map(
         (snippet) => snippet.communityId
       )
+      console.log("lastVisibleItem: ", lastVisibleItem)
       const postQuery = query(
         collection(firestore, "posts"),
         where("communityId", "in", myCommunityIds),
-        limit(10)
+        orderBy("createdAt", "desc"),
+        startAfter(lastVisibleItem),
+        limit(5)
       )
 
       const postDocs = await getDocs(postQuery)
+
+      setLastVisibleItem(postDocs.docs[postDocs.docs.length - 1])
+
       const posts = postDocs.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }))
-      setPostStateValue((prev) => ({
-        ...prev,
-        posts: posts as Post[],
-      }))
-    } else {
-      buildNoUserHomeFeed()
-    }
-    try {
-    } catch (error) {
-      console.log("buildUserHomeFeed error: ", error)
-    }
-  }
-
-  const buildNoUserHomeFeed = async () => {
-    setLoading(true)
-    try {
-      const postQuery = query(
-        collection(firestore, "posts"),
-        orderBy("voteStatus", "desc"),
-        limit(50)
-      )
-
-      const postDocs = await getDocs(postQuery)
-      const posts = postDocs.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
+      console.log("posts.length: ", posts.length)
+      posts.length < 5 && setHasMore(false)
 
       setPostStateValue((prev) => ({
         ...prev,
-        posts: posts as Post[],
+        posts: [...prev.posts, ...posts] as Post[],
       }))
+
+      return posts
     } catch (error) {
-      console.log("buildNoUserHomeFeed error: ", error)
+      console.log("userFetchNext error: ", error)
     }
-    setLoading(false)
   }
+
+  const noUserFetchFirst = async () => {}
+
+  const noUserFetchNext = async () => {}
+
+  // const buildUserHomeFeed = async () => {
+  //   try {
+  //     if (communityStateValue.mySnippets.length) {
+  //       // Get posts from users communities
+  //       const myCommunityIds = communityStateValue.mySnippets.map(
+  //         (snippet) => snippet.communityId
+  //       )
+  //       const postQuery = query(
+  //         collection(firestore, "posts"),
+  //         where("communitlastKyId", "in", myCommunityIds),
+  //         limit(10)
+  //       )
+
+  //       const postDocs = await getDocs(postQuery)
+  //       const posts = postDocs.docs.map((doc) => ({
+  //         id: doc.id,
+  //         ...doc.data(),
+  //       }))
+  //       setPostStateValue((prev) => ({
+  //         ...prev,
+  //         posts: posts as Post[],
+  //       }))
+  //       return posts
+  //     } else {
+  //       buildNoUserHomeFeed()
+  //     }
+  //   } catch (error) {
+  //     console.log("buildUserHomeFeed error: ", error)
+  //   }
+  // }
+
+  // const buildNoUserHomeFeed = async () => {
+  //   setLoading(true)
+  //   try {
+  //     const postQuery = query(
+  //       collection(firestore, "posts"),
+  //       orderBy("voteStatus", "desc"),
+  //       limit(50)
+  //     )
+
+  //     const postDocs = await getDocs(postQuery)
+  //     const posts = postDocs.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }))
+
+  //     setPostStateValue((prev) => ({
+  //       ...prev,
+  //       posts: posts as Post[],
+  //     }))
+  //     return posts
+  //   } catch (error) {
+  //     console.log("buildNoUserHomeFeed error: ", error)
+  //   }
+  //   setLoading(false)
+  // }
 
   const getUserPostVotes = async () => {
     try {
@@ -117,12 +200,12 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (communityStateValue.snippetsFetched) buildUserHomeFeed()
+    if (communityStateValue.snippetsFetched) userFetchFirst()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [communityStateValue.snippetsFetched])
 
   useEffect(() => {
-    if (!user && !loadingUser) buildNoUserHomeFeed()
+    if (!user && !loadingUser) noUserFetchFirst()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loadingUser])
 
@@ -145,22 +228,34 @@ export default function Home() {
           <PostLoader />
         ) : (
           <Stack>
-            {postStateValue.posts.map((post) => (
-              <PostItem
-                key={post.id}
-                post={post}
-                onSelectPost={onSelectPost}
-                onDeletePost={onDeletePost}
-                onVote={onVote}
-                userVoteValue={
-                  postStateValue.postVotes.find(
-                    (item) => item.postId === post.id
-                  )?.voteValue
-                }
-                userIsCreator={user?.uid === post.creatorId}
-                homePage
-              />
-            ))}
+            <InfiniteScroll
+              dataLength={postStateValue.posts.length} //This is important field to render the next data
+              next={userFetchNext}
+              hasMore={hasMore}
+              loader={<h4>Loading...</h4>}
+              endMessage={
+                <p style={{ textAlign: "center" }}>
+                  <b>Yay! You have seen it all</b>
+                </p>
+              }
+            >
+              {postStateValue.posts.map((post, index) => (
+                <PostItem
+                  key={index}
+                  post={post}
+                  onSelectPost={onSelectPost}
+                  onDeletePost={onDeletePost}
+                  onVote={onVote}
+                  userVoteValue={
+                    postStateValue.postVotes.find(
+                      (item) => item.postId === post.id
+                    )?.voteValue
+                  }
+                  userIsCreator={user?.uid === post.creatorId}
+                  homePage
+                />
+              ))}
+            </InfiniteScroll>
           </Stack>
         )}
       </>
