@@ -43,6 +43,7 @@ export default function Home() {
   const userFetchFirst = async () => {
     if (communityStateValue.mySnippets.length) {
       // Get posts from users communities
+      setLoading(true)
       try {
         const myCommunityIds = communityStateValue.mySnippets.map(
           (snippet) => snippet.communityId
@@ -69,14 +70,47 @@ export default function Home() {
           ...prev,
           posts: posts as Post[],
         }))
-
+        setLoading(false)
         return posts
       } catch (error) {
         console.log("userFetchFirst error: ", error)
       }
+      setLoading(false)
     } else {
       noUserFetchFirst()
     }
+  }
+
+  const noUserFetchFirst = async () => {
+    setLoading(true)
+    try {
+      const postQuery = query(
+        collection(firestore, "posts"),
+        orderBy("voteStatus", "desc"),
+        limit(5)
+      )
+
+      const postDocs = await getDocs(postQuery)
+
+      setLastVisibleItem(postDocs.docs[postDocs.docs.length - 1])
+
+      const posts = postDocs.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+
+      posts.length < 5 && setHasMore(false)
+
+      setPostStateValue((prev) => ({
+        ...prev,
+        posts: posts as Post[],
+      }))
+      setLoading(false)
+      return posts
+    } catch (error) {
+      console.log("noUserFetchFirst error: ", error)
+    }
+    setLoading(false)
   }
 
   const userFetchNext = async () => {
@@ -84,7 +118,7 @@ export default function Home() {
       const myCommunityIds = communityStateValue.mySnippets.map(
         (snippet) => snippet.communityId
       )
-      console.log("lastVisibleItem: ", lastVisibleItem)
+
       const postQuery = query(
         collection(firestore, "posts"),
         where("communityId", "in", myCommunityIds),
@@ -115,66 +149,36 @@ export default function Home() {
     }
   }
 
-  const noUserFetchFirst = async () => {}
+  const noUserFetchNext = async () => {
+    try {
+      const postQuery = query(
+        collection(firestore, "posts"),
+        orderBy("voteStatus", "desc"),
+        startAfter(lastVisibleItem),
+        limit(5)
+      )
 
-  const noUserFetchNext = async () => {}
+      const postDocs = await getDocs(postQuery)
 
-  // const buildUserHomeFeed = async () => {
-  //   try {
-  //     if (communityStateValue.mySnippets.length) {
-  //       // Get posts from users communities
-  //       const myCommunityIds = communityStateValue.mySnippets.map(
-  //         (snippet) => snippet.communityId
-  //       )
-  //       const postQuery = query(
-  //         collection(firestore, "posts"),
-  //         where("communitlastKyId", "in", myCommunityIds),
-  //         limit(10)
-  //       )
+      setLastVisibleItem(postDocs.docs[postDocs.docs.length - 1])
 
-  //       const postDocs = await getDocs(postQuery)
-  //       const posts = postDocs.docs.map((doc) => ({
-  //         id: doc.id,
-  //         ...doc.data(),
-  //       }))
-  //       setPostStateValue((prev) => ({
-  //         ...prev,
-  //         posts: posts as Post[],
-  //       }))
-  //       return posts
-  //     } else {
-  //       buildNoUserHomeFeed()
-  //     }
-  //   } catch (error) {
-  //     console.log("buildUserHomeFeed error: ", error)
-  //   }
-  // }
+      const posts = postDocs.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      console.log("posts.length: ", posts.length)
+      posts.length < 5 && setHasMore(false)
 
-  // const buildNoUserHomeFeed = async () => {
-  //   setLoading(true)
-  //   try {
-  //     const postQuery = query(
-  //       collection(firestore, "posts"),
-  //       orderBy("voteStatus", "desc"),
-  //       limit(50)
-  //     )
+      setPostStateValue((prev) => ({
+        ...prev,
+        posts: [...prev.posts, ...posts] as Post[],
+      }))
 
-  //     const postDocs = await getDocs(postQuery)
-  //     const posts = postDocs.docs.map((doc) => ({
-  //       id: doc.id,
-  //       ...doc.data(),
-  //     }))
-
-  //     setPostStateValue((prev) => ({
-  //       ...prev,
-  //       posts: posts as Post[],
-  //     }))
-  //     return posts
-  //   } catch (error) {
-  //     console.log("buildNoUserHomeFeed error: ", error)
-  //   }
-  //   setLoading(false)
-  // }
+      return posts
+    } catch (error) {
+      console.log("userFetchNext error: ", error)
+    }
+  }
 
   const getUserPostVotes = async () => {
     try {
@@ -220,6 +224,7 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, postStateValue.posts])
+
   return (
     <PageContent>
       <>
@@ -230,7 +235,7 @@ export default function Home() {
           <>
             <InfiniteScroll
               dataLength={postStateValue.posts.length} //This is important field to render the next data
-              next={userFetchNext}
+              next={user ? userFetchNext : noUserFetchNext}
               hasMore={hasMore}
               loader={<h4>Loading...</h4>}
               endMessage={
