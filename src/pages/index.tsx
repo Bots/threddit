@@ -1,4 +1,4 @@
-import { Flex, Stack } from "@chakra-ui/react"
+import { Flex, Stack, chakra } from "@chakra-ui/react"
 import {
   collection,
   getDocs,
@@ -50,7 +50,7 @@ export default function Home() {
         const postQuery = query(
           collection(firestore, "posts"),
           where("communityId", "in", myCommunityIds),
-          orderBy("createdAt", "desc"),
+          orderBy("voteStatus", "desc"),
           limit(5)
         )
 
@@ -88,7 +88,7 @@ export default function Home() {
       const postQuery = query(
         collection(firestore, "posts"),
         where("communityId", "in", myCommunityIds),
-        orderBy("createdAt", "desc"),
+        orderBy("voteStatus", "desc"),
         startAfter(lastVisibleItem),
         limit(5)
       )
@@ -227,7 +227,7 @@ export default function Home() {
         {loading ? (
           <PostLoader />
         ) : (
-          <Stack>
+          <>
             <InfiniteScroll
               dataLength={postStateValue.posts.length} //This is important field to render the next data
               next={userFetchNext}
@@ -235,28 +235,32 @@ export default function Home() {
               loader={<h4>Loading...</h4>}
               endMessage={
                 <p style={{ textAlign: "center" }}>
-                  <b>Yay! You have seen it all</b>
+                  <b>You&apos;ve reached the end of the interwebs.</b>
                 </p>
               }
             >
               {postStateValue.posts.map((post, index) => (
-                <PostItem
+                <div
                   key={index}
-                  post={post}
-                  onSelectPost={onSelectPost}
-                  onDeletePost={onDeletePost}
-                  onVote={onVote}
-                  userVoteValue={
-                    postStateValue.postVotes.find(
-                      (item) => item.postId === post.id
-                    )?.voteValue
-                  }
-                  userIsCreator={user?.uid === post.creatorId}
-                  homePage
-                />
+                  style={{ marginBottom: "20px" }}
+                >
+                  <PostItem
+                    post={post}
+                    onSelectPost={onSelectPost}
+                    onDeletePost={onDeletePost}
+                    onVote={onVote}
+                    userVoteValue={
+                      postStateValue.postVotes.find(
+                        (item) => item.postId === post.id
+                      )?.voteValue
+                    }
+                    userIsCreator={user?.uid === post.creatorId}
+                    homePage
+                  />
+                </div>
               ))}
             </InfiniteScroll>
-          </Stack>
+          </>
         )}
       </>
       <Stack spacing={5}>
