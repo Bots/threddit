@@ -16,9 +16,8 @@ export const theme = extendTheme({
         bg: "gray.200",
       },
     }),
-  },
-  components: {
-    Button,
-    // Input, // not working for some reason - come back to this
+    components: {
+      Button,
+    },
   },
 })
