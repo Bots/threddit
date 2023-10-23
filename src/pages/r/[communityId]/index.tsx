@@ -11,7 +11,6 @@ import { doc, getDoc } from "firebase/firestore"
 import { GetServerSidePropsContext } from "next"
 import React, { useEffect } from "react"
 import { useSetRecoilState } from "recoil"
-import safeJsonStringify from "safe-json-stringify"
 
 type CommunityPageProps = {
   communityData: Community
@@ -68,8 +67,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       props: {
         communityData: communityDoc.exists()
           ? JSON.parse(
-              safeJsonStringify({ id: communityDoc.id, ...communityDoc.data() }) // needed for dates
-            )
+              JSON.stringify({ id: communityDoc.id, ...communityDoc.data() })) // needed for dates
           : "",
       },
     }

@@ -28,9 +28,10 @@ const inter = Inter({ subsets: ["latin"] })
 
 export default function Home() {
   const [user, loadingUser] = useAuthState(auth)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<boolean>(false)
   const [lastVisibleItem, setLastVisibleItem] = useState({})
-  const [hasMore, setHasMore] = useState(true)
+  const [hasMore, setHasMore] = useState<boolean>(true)
+  const [mounted, setMounted] = useState<boolean>(false)
   const {
     postStateValue,
     setPostStateValue,
@@ -225,54 +226,57 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, postStateValue.posts])
 
-  return (
-    <PageContent>
-      <>
-        <CreatePostLink />
-        {loading ? (
-          <PostLoader />
-        ) : (
-          <>
-            <InfiniteScroll
-              dataLength={postStateValue.posts.length} //This is important field to render the next data
-              next={user ? userFetchNext : noUserFetchNext}
-              hasMore={hasMore}
-              loader={<h4>Loading...</h4>}
-              endMessage={
-                <p style={{ textAlign: "center" }}>
-                  <b>You&apos;ve reached the end of the interwebs.</b>
-                </p>
-              }
-            >
-              {postStateValue.posts.map((post, index) => (
-                <div
-                  key={index}
-                  style={{ marginBottom: "20px" }}
-                >
-                  <PostItem
-                    post={post}
-                    onSelectPost={onSelectPost}
-                    onDeletePost={onDeletePost}
-                    onVote={onVote}
-                    userVoteValue={
-                      postStateValue.postVotes.find(
-                        (item) => item.postId === post.id
-                      )?.voteValue
-                    }
-                    userIsCreator={user?.uid === post.creatorId}
-                    homePage
-                  />
-                </div>
-              ))}
-            </InfiniteScroll>
-          </>
-        )}
-      </>
-      <Stack spacing={5}>
-        <Recommendations />
-        <Premium />
-        <PersonalHome />
-      </Stack>
-    </PageContent>
-  )
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (mounted) {
+    return (
+      <PageContent>
+        <>
+          <CreatePostLink />
+          {loading ? (
+            <PostLoader />
+          ) : (
+            <>
+              <InfiniteScroll
+                dataLength={postStateValue.posts.length} //This is important field to render the next data
+                next={user ? userFetchNext : noUserFetchNext}
+                hasMore={hasMore}
+                loader={<h4>Loading...</h4>}
+                endMessage={
+                  <p style={{ textAlign: "center" }}>
+                    <b>You&apos;ve reached the end of the interwebs.</b>
+                  </p>
+                }
+              >
+                {postStateValue.posts.map((post, index) => (
+                  <div key={index} style={{ marginBottom: "20px" }}>
+                    <PostItem
+                      post={post}
+                      onSelectPost={onSelectPost}
+                      onDeletePost={onDeletePost}
+                      onVote={onVote}
+                      userVoteValue={
+                        postStateValue.postVotes.find(
+                          (item) => item.postId === post.id
+                        )?.voteValue
+                      }
+                      userIsCreator={user?.uid === post.creatorId}
+                      homePage
+                    />
+                  </div>
+                ))}
+              </InfiniteScroll>
+            </>
+          )}
+        </>
+        <Stack spacing={5}>
+          <Recommendations />
+          <Premium />
+          <PersonalHome />
+        </Stack>
+      </PageContent>
+    )
+  }
 }
