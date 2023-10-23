@@ -1,4 +1,4 @@
-import { Flex, Stack, chakra } from "@chakra-ui/react"
+import { Stack } from "@chakra-ui/react"
 import {
   collection,
   getDocs,
@@ -11,6 +11,7 @@ import {
 import { Inter } from "next/font/google"
 import { useEffect, useState } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
+import InfiniteScroll from "react-infinite-scroll-component"
 import { Post, PostVote } from "../atoms/postAtom"
 import CreatePostLink from "../components/Community/CreatePostLink"
 import PersonalHome from "../components/Community/PersonalHome"
@@ -22,15 +23,14 @@ import PostLoader from "../components/Posts/PostLoader"
 import { auth, firestore } from "../firebase/clientApp"
 import useCommunityData from "../hooks/useCommunityData"
 import usePosts from "../hooks/usePosts"
-import InfiniteScroll from "react-infinite-scroll-component"
 
 const inter = Inter({ subsets: ["latin"] })
+let hasMore = true
 
 export default function Home() {
   const [user, loadingUser] = useAuthState(auth)
   const [loading, setLoading] = useState<boolean>(false)
   const [lastVisibleItem, setLastVisibleItem] = useState({})
-  const [hasMore, setHasMore] = useState<boolean>(true)
   const [mounted, setMounted] = useState<boolean>(false)
   const {
     postStateValue,
@@ -65,7 +65,9 @@ export default function Home() {
           ...doc.data(),
         }))
 
-        posts.length < 5 && setHasMore(false)
+        if(posts.length < 5) {
+          hasMore = false
+        }
 
         setPostStateValue((prev) => ({
           ...prev,
@@ -100,7 +102,9 @@ export default function Home() {
         ...doc.data(),
       }))
 
-      posts.length < 5 && setHasMore(false)
+      if(posts.length < 5) {
+        hasMore = false
+      }
 
       setPostStateValue((prev) => ({
         ...prev,
@@ -136,8 +140,10 @@ export default function Home() {
         id: doc.id,
         ...doc.data(),
       }))
-      console.log("posts.length: ", posts.length)
-      posts.length < 5 && setHasMore(false)
+
+      if(posts.length < 5) {
+        hasMore = false
+      }
 
       setPostStateValue((prev) => ({
         ...prev,
@@ -167,8 +173,10 @@ export default function Home() {
         id: doc.id,
         ...doc.data(),
       }))
-      console.log("posts.length: ", posts.length)
-      posts.length < 5 && setHasMore(false)
+
+      if(posts.length < 5) {
+        hasMore = false
+      }
 
       setPostStateValue((prev) => ({
         ...prev,
