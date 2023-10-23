@@ -169,7 +169,7 @@ const PostItem: React.FC<PostItemProps> = ({
                 ></Icon>
               </>
             )}
-            <Text>
+            <Text suppressHydrationWarning>
               Posted by u/{post.creatorDisplayName}{" "}
               {moment(new Date(post.createdAt?.seconds * 1000)).fromNow()}
             </Text>
