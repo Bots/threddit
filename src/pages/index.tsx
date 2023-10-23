@@ -213,11 +213,13 @@ export default function Home() {
   }
 
   useEffect(() => {
+    hasMore = true
     if (communityStateValue.snippetsFetched) userFetchFirst()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [communityStateValue.snippetsFetched])
 
   useEffect(() => {
+    hasMore = true
     if (!user && !loadingUser) noUserFetchFirst()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loadingUser])
