@@ -14,13 +14,13 @@ import Communities from "./Communities"
 import useDirectory from "@/src/hooks/useDirectory"
 
 const UserMenu: React.FC = () => {
-  const { directoryState, toggleMenuOpen } = useDirectory()
+  const { directoryState, toggleMenuOpen, closeMenu } = useDirectory()
 
   const menuRef = useRef(null)
 
   useOutsideClick({
     ref: menuRef,
-    handler: toggleMenuOpen,
+    handler: closeMenu,
   })
 
   return (
