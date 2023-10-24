@@ -1,5 +1,6 @@
-import { postState } from "@/src/atoms/postAtom"
+import { Post, postState } from "@/src/atoms/postAtom"
 import { firestore, storage } from "@/src/firebase/clientApp"
+import usePosts from "@/src/hooks/usePosts"
 import useSelectFile from "@/src/hooks/useSelectFile"
 import { Alert, AlertIcon, Flex, Icon, Text } from "@chakra-ui/react"
 import { User } from "firebase/auth"
@@ -7,6 +8,7 @@ import {
   Timestamp,
   addDoc,
   collection,
+  getDoc,
   serverTimestamp,
   updateDoc,
 } from "firebase/firestore"
@@ -64,12 +66,15 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
     title: "",
     body: "",
   })
-  const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const setPostItems = useSetRecoilState(postState)
+  const { selectedFile, setSelectedFile, onSelectFile } = useSelectFile()
+  const { onVote } = usePosts()
 
-  const handleCreatePost = async () => {
+  const handleCreatePost = async (
+    event: React.MouseEvent<SVGElement, MouseEvent>
+  ): Promise<void> => {
     const { communityId } = router.query
 
     setLoading(true)
@@ -101,12 +106,24 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
           imageURL: downloadURL,
         })
       }
+
       // redirect the user back to the communityPage using the router
       // Clear the cache to cause a refetch of the posts
       setPostItems((prev) => ({
         ...prev,
         postUpdateRequired: true,
       }))
+
+      // Get the post and upvote it
+      const postDoc = await getDoc(postDocRef)
+      let post = postDoc.data()
+      post = {
+        ...post,
+        id: postDocRef.id,
+      }
+      onVote(event, post as Post, 1, communityId as string)
+
+      // Direct user back to community page
       router.back()
     } catch (error) {
       console.log("handleCreatePostError: ", error)
@@ -148,7 +165,7 @@ const NewPostForm: React.FC<NewPostFormProps> = ({
         {selectedTab === "Post" && (
           <TextInputs
             textInputs={textInputs}
-            handleCreatePost={handleCreatePost}
+            handleCreatePost={(event) => handleCreatePost(event)}
             onChange={onTextChange}
             loading={loading}
           />

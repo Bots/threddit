@@ -9,7 +9,7 @@ type TextInputsProps = {
   onChange: (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void
-  handleCreatePost: () => void
+  handleCreatePost: (event: any) => Promise<void>
   loading: boolean
 }
 
