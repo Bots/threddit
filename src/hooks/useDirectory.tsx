@@ -33,6 +33,13 @@ const useDirectory = () => {
     }))
   }
 
+  const closeMenu = () => {
+    setDirectoryState((prev) => ({
+      ...prev,
+      isOpen: false,
+    }))
+  }
+
   useEffect(() => {
     const { currentCommunity } = communityStateValue
 
@@ -56,6 +63,6 @@ const useDirectory = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [communityStateValue.currentCommunity])
 
-  return { directoryState, toggleMenuOpen, onSelectMenuItem }
+  return { directoryState, toggleMenuOpen, onSelectMenuItem, closeMenu }
 }
 export default useDirectory
