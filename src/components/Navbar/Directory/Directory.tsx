@@ -7,17 +7,29 @@ import {
   MenuList,
   Text,
   Image,
+  useOutsideClick,
 } from "@chakra-ui/react"
-import React from "react"
+import React, { useRef } from "react"
 import Communities from "./Communities"
 import useDirectory from "@/src/hooks/useDirectory"
 
 const UserMenu: React.FC = () => {
   const { directoryState, toggleMenuOpen } = useDirectory()
 
+  const menuRef = useRef(null)
+
+  useOutsideClick({
+    ref: menuRef,
+    handler: toggleMenuOpen,
+  })
+
   return (
-    <Menu isOpen={directoryState.isOpen}>
+    <Menu
+      isOpen={directoryState.isOpen}
+      closeOnBlur
+    >
       <MenuButton
+        ref={menuRef}
         cursor="pointer"
         padding="0px 6px"
         borderRadius={4}
